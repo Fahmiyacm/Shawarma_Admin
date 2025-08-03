@@ -1,9 +1,3 @@
-__pycache__/
-*.py[cod]
-*.log
-*.db
-*.env
-.env
 .idea
 .venv
 venv

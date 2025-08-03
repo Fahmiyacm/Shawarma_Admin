@@ -49,35 +49,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Database configuration
-DB_CONFIG = {
-    "dbname": "dbshawarmabot",
-    "user": "postgres",
-    "password": "12345",
-    "host": "localhost",
-    "port": "5432",
-}
-
-def fetch_data(query: str) -> pd.DataFrame:
-    """Fetch data from the database using the provided SQL query.
-
-    Args:
-        query (str): SQL query to execute.
-
-    Returns:
-        pd.DataFrame: DataFrame containing query results, or empty DataFrame on error.
-    """
-    try:
-        conn = psycopg2.connect(**DB_CONFIG)
-        df = pd.read_sql_query(query, conn)
-        conn.close()
-        logger.info("Successfully fetched data from database")
-        return df
-    except Exception as e:
-        st.error(f"Database Error: {e}")
-        logger.error(f"Database error: {e}")
-        return pd.DataFrame()
-
 # Navigation bar
 st.sidebar.title("🔧 Admin Panel")
 menu_option = st.sidebar.radio(
@@ -89,16 +60,17 @@ menu_option = st.sidebar.radio(
 if menu_option == "Dashboard":
     st.title("📊 Shawarma DKENZ Sales Dashboard")
 
-    # Filters
+    # Filters in sidebar
     with st.sidebar:
         st.header("📅 Filters")
         from_date = st.date_input("Start Date", datetime(2025, 1, 1))
         to_date = st.date_input("End Date", datetime(2025, 12, 31))
 
-    # Fetch menu data
-    menu_df = fetch_data("SELECT item_name, category FROM menu")
-    item_options = list(menu_df["item_name"].unique()) if not menu_df.empty else []
-    category_options = list(menu_df["category"].unique()) if not menu_df.empty else []
+    # Fetch menu data using helper
+    menu_data = fetch_menu()
+    menu_df = pd.DataFrame(menu_data, columns=["ID", "item_name", "category", "item_price"])
+    item_options = menu_df["item_name"].unique().tolist() if not menu_df.empty else []
+    category_options = menu_df["category"].unique().tolist() if not menu_df.empty else []
 
     with st.sidebar:
         with st.expander("🎯 Advanced Filters"):
@@ -114,31 +86,42 @@ if menu_option == "Dashboard":
             )
         search_term = st.text_input("🔍 Search by Item Name")
 
-    # Build dynamic SQL query
-    query = f"""
-    SELECT order_id, item_name, item_price, quantity, total_price, time_at
-    FROM orders
-    WHERE time_at::date BETWEEN '{from_date}' AND '{to_date}'
-    """
-    if item_filter and len(item_filter) < len(item_options):
-        items_str = ",".join([f"'{item}'" for item in item_filter])
-        query += f" AND item_name IN ({items_str})"
-
-    df = fetch_data(query)
-    if df.empty:
-        st.warning("No orders found for selected filters.")
-        logger.warning("No orders found for selected filters")
+    # Fetch order data with category info using helper
+    df_orders = fetch_order_data()
+    if df_orders.empty:
+        st.warning("No orders found in database.")
+        logger.warning("No orders found in database")
         st.stop()
 
-    df = df.merge(menu_df, on="item_name", how="left")
+    # Ensure datetime type for filtering
+    df_orders["time_at"] = pd.to_datetime(df_orders["time_at"])
+
+    # Filter by date
+    df_filtered = df_orders[
+        (df_orders["time_at"].dt.date >= from_date) &
+        (df_orders["time_at"].dt.date <= to_date)
+    ]
+
+    # Filter by selected items if filter narrowed
+    if item_filter and len(item_filter) < len(item_options):
+        df_filtered = df_filtered[df_filtered["item_name"].isin(item_filter)]
+
+    # Filter by selected categories if filter narrowed
     if category_filter and len(category_filter) < len(category_options):
-        df = df[df["category"].isin(category_filter)]
+        df_filtered = df_filtered[df_filtered["category"].isin(category_filter)]
+
+    # Filter by search term (case-insensitive)
     if search_term:
-        df = df[df["item_name"].str.contains(search_term, case=False, na=False)]
-    if df.empty:
+        df_filtered = df_filtered[
+            df_filtered["item_name"].str.contains(search_term, case=False, na=False)
+        ]
+
+    if df_filtered.empty:
         st.warning("No data after applying all filters.")
         logger.warning("No data after applying all filters")
         st.stop()
+
+    df = df_filtered.copy()  # use filtered dataframe for analysis
 
     # Key Metrics
     st.subheader("📈 Key Metrics")
@@ -187,7 +170,6 @@ if menu_option == "Dashboard":
         )
         st.plotly_chart(fig_pie, use_container_width=True)
 
-        df["time_at"] = pd.to_datetime(df["time_at"])
         daily_sales = df.groupby([df["time_at"].dt.date, "category"])["total_price"].sum().reset_index()
         fig_line = px.line(
             daily_sales,
@@ -245,6 +227,7 @@ if menu_option == "Dashboard":
     except Exception as e:
         st.error("Failed to generate item-wise analysis.")
         logger.error(f"Error in item-wise analysis: {e}")
+
 
 # Manage Menu Page
 elif menu_option == "Manage Menu":
