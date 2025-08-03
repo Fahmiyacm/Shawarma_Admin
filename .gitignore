@@ -1,0 +1,32 @@
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# PyCharm project settings
+.idea/
+
+# Virtual environments
+venv/
+.venv/
+ENV/
+env/
+
+# Environment variable files
+.env
+
+# Streamlit
+.streamlit/config.toml
+.streamlit/secrets.toml
+
+# Jupyter notebooks & checkpoints (if any)
+.ipynb_checkpoints/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Logs and temp files
+*.log
+*.tmp
