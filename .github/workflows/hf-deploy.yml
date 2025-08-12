@@ -23,18 +23,7 @@ jobs:
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
 
-          # Create a temporary branch removing screenshots
-          git checkout -b hf-deploy
-          git rm -r --cached Screenshots/
-          git commit -m "Remove screenshots for Hugging Face deployment" || echo "No changes to commit"
+          git remote add space https://Fahmiyacm:${HF_TOKEN}@huggingface.co/spaces/Fahmiyacm/shawarma-admin
 
-          # Create a new orphan branch with no history
-          git checkout --orphan hf-clean
-          git add .
-          git commit -m "Deploy clean version without screenshots"
-
-          # Add Hugging Face remote
-          git remote add space https://Fahmiyacm:${HF_TOKEN}@huggingface.co/spaces/Fahmiyacm/shawarma-admin-app
-
-          # Force push orphan branch to Hugging Face main branch
-          git push --force space hf-clean:main
+          # Push only the current commit (shallow push, no history)
+          git push --force --no-verify space HEAD:main --depth=1
