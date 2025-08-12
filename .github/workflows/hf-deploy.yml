@@ -16,7 +16,7 @@ jobs:
           fetch-depth: 0
           lfs: true
 
-      - name: Push to Hugging Face Space (without screenshots)
+      - name: Push to Hugging Face Space (without Screenshots)
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
@@ -25,8 +25,8 @@ jobs:
 
           # Create a temporary branch for HF deploy
           git checkout -b hf-deploy
-          git rm -r --cached screenshots/
-          git commit -m "Remove screenshots for Hugging Face deployment" || echo "No changes to commit"
+          git rm -r --cached Screenshots/
+          git commit -m "Remove Screenshots for Hugging Face deployment" || echo "No changes to commit"
 
           # Add Hugging Face remote
           git remote add space https://Fahmiyacm:${HF_TOKEN}@huggingface.co/spaces/Fahmiyacm/shawarma-admin
