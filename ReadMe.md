@@ -1,5 +1,6 @@
 sdk: docker
 app_port: 8501
+startup_duration_timeout: 1h
 # Shawarma DKENZ Admin Dashboard – Summary Documentation
 
 ## Overview
