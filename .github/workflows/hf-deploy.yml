@@ -34,7 +34,7 @@ jobs:
           git commit -m "Deploy clean version without screenshots"
 
           # Add Hugging Face remote
-          git remote add space https://Fahmiyacm:${HF_TOKEN}@huggingface.co/spaces/Fahmiyacm/shawarma-admin
+          git remote add space https://Fahmiyacm:${HF_TOKEN}@huggingface.co/spaces/Fahmiyacm/shawarma-admin-app
 
           # Force push orphan branch to Hugging Face main branch
           git push --force space hf-clean:main
