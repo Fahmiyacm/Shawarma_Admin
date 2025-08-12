@@ -18,7 +18,7 @@ The admin dashboard resides in the ShawarmaAdminApp folder:
 
 ShawarmaAdminApp/
 
-├── admin_app.py                # Main Streamlit admin dashboard
+├── app.py                # Main Streamlit admin dashboard
 
 ├── admin_neondb_helper.py      # Database helper module for Neon PostgreSQL
 

@@ -1,3 +1,5 @@
+sdk: docker
+app_port: 8501
 # Shawarma DKENZ Admin Dashboard – Summary Documentation
 
 ## Overview
@@ -6,7 +8,7 @@ The Shawarma DKENZ Admin Dashboard is a Streamlit web app used by restaurant adm
 
 ## Folder Structure
 
-admin_app.py: Main dashboard UI (menu management, dashboard, forecasting).
+app.py: Main dashboard UI (menu management, dashboard, forecasting).
 
 admin_neondb_helper.py: Handles database operations.
 
@@ -79,6 +81,11 @@ Prophet Issues: Ensure enough valid order data.
 
 Logging: Logs output to console or Streamlit logs for debugging.
 
+## Hugging Face Deployment Notes
+This app is configured for Hugging Face Spaces with a Docker runtime.  
+- Ensure you set `DATABASE_URL` in Space **Settings → Secrets**.  
+- The Space will auto-build using the `Dockerfile` in this repo.  
+- Streamlit runs on port 8501.
 ## Conclusion
 
 The Shawarma DKENZ Admin Dashboard offers a simple, powerful interface for managing restaurant data and sales trends. It’s fully integrated with Neon and ready for deployment on platforms like Render.
