@@ -23,7 +23,15 @@ jobs:
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
 
-          git remote add space https://Fahmiyacm:${HF_TOKEN}@huggingface.co/spaces/Fahmiyacm/shawarma-admin
+          # Create a new branch from main for deployment
+          git checkout -b hf-deploy
 
-          # Push only the current commit (shallow push, no history)
-          git push --force --no-verify space HEAD:main --depth=1
+          # Remove screenshots only from Git tracking (not deleting local files)
+          git rm -r --cached Screenshots/
+          git commit -m "Remove screenshots for HF deploy" || echo "No changes to commit"
+
+          # Add Hugging Face remote
+          git remote add space https://Fahmiyacm:${HF_TOKEN}@huggingface.co/spaces/Fahmiyacm/shawarma-admin-app
+
+          # Push this cleaned branch to HF main
+          git push --force space hf-deploy:main
