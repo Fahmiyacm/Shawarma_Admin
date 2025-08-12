@@ -34,5 +34,5 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/Shawarma-Admin:latest .
-          docker push ${{ secrets.DOCKER_USERNAME }}/Shawarma-Admin:latest
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/shawarma-admin:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/shawarma-admin:latest
