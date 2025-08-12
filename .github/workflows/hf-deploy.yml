@@ -1,14 +1,35 @@
-- name: Push to Hugging Face Space
-  env:
-    HF_TOKEN: ${{ secrets.HF_TOKEN }}
-  run: |
-    git config --global user.email "actions@github.com"
-    git config --global user.name "GitHub Actions"
+name: Deploy to Hugging Face Spaces
 
-    # Create a temporary branch for HF without screenshots
-    git checkout -b hf-deploy
-    git rm -r --cached screenshots/
-    git commit -m "Remove screenshots for Hugging Face deployment" || echo "No changes to commit"
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
-    git remote add space https://Fahmiyacm:${HF_TOKEN}@huggingface.co/spaces/Fahmiyacm/shawarma-admin
-    git push --force space hf-deploy:main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Push to Hugging Face Space (without screenshots)
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+
+          # Create a temporary branch for HF deploy
+          git checkout -b hf-deploy
+          git rm -r --cached screenshots/
+          git commit -m "Remove screenshots for Hugging Face deployment" || echo "No changes to commit"
+
+          # Add Hugging Face remote
+          git remote add space https://Fahmiyacm:${HF_TOKEN}@huggingface.co/spaces/Fahmiyacm/shawarma-admin
+
+          # Push hf-deploy branch to Hugging Face main
+          git push --force space hf-deploy:main
