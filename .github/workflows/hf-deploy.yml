@@ -16,20 +16,25 @@ jobs:
           fetch-depth: 0
           lfs: true
 
-      - name: Push to Hugging Face Space (without Screenshots)
+      - name: Push to Hugging Face Space (clean deploy without screenshots)
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "GitHub Actions"
 
-          # Create a temporary branch for HF deploy
+          # Create a temporary branch removing screenshots
           git checkout -b hf-deploy
           git rm -r --cached Screenshots/
-          git commit -m "Remove Screenshots for Hugging Face deployment" || echo "No changes to commit"
+          git commit -m "Remove screenshots for Hugging Face deployment" || echo "No changes to commit"
+
+          # Create a new orphan branch with no history
+          git checkout --orphan hf-clean
+          git add .
+          git commit -m "Deploy clean version without screenshots"
 
           # Add Hugging Face remote
           git remote add space https://Fahmiyacm:${HF_TOKEN}@huggingface.co/spaces/Fahmiyacm/shawarma-admin
 
-          # Push hf-deploy branch to Hugging Face main
-          git push --force space hf-deploy:main
+          # Force push orphan branch to Hugging Face main branch
+          git push --force space hf-clean:main
